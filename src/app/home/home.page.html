@@ -1,0 +1,19 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>
+      DJI Tello Controller
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <ion-button expand="full" color="primary" (click)="takeOff()">
+    Take Off
+  </ion-button>
+  <ion-button expand="full" color="danger" (click)="land()">
+    Land
+  </ion-button>
+  <ion-button expand="full" color="secondary" (click)="sendCommand('command')">
+    Send Command Mode
+  </ion-button>
+</ion-content>
