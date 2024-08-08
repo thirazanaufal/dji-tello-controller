@@ -10,8 +10,9 @@ import * as nipplejs from 'nipplejs';
 export class HomePage implements AfterViewInit {
   movementJoystick: any;
   directionalJoystick: any;
-  private canSendCommand = true;
-  private commandDelay = 2000; // Delay dalam milidetik
+  movementInterval: any;
+  directionalInterval: any;
+  speed = 50;
 
   constructor(private telloService: TelloService) {}
 
@@ -44,70 +45,80 @@ export class HomePage implements AfterViewInit {
         this.handleMovementJoystick(data);
       });
 
+      this.movementJoystick.on('end', () => {
+        this.stopMovement();
+      });
+
       this.directionalJoystick.on('move', (_evt: any, data: any) => {
         this.handleDirectionalJoystick(data);
+      });
+
+      this.directionalJoystick.on('end', () => {
+        this.stopDirectional();
       });
     } else {
       console.error('Joystick elements not found');
     }
   }
 
-  async handleMovementJoystick(data: any) {
-    if (this.canSendCommand) {
-      const angle = data.angle.degree;
-      const distance = data.distance;
+  handleMovementJoystick(data: any) {
+    const angle = data.angle.degree;
 
-      if (distance > 20) {
-        if (angle >= 315 || angle < 45) {
-          await this.sendCommand('right 10');
-        } else if (angle >= 45 && angle < 135) {
-          await this.sendCommand('forward 10');
-        } else if (angle >= 135 && angle < 225) {
-          await this.sendCommand('left 10');
-        } else if (angle >= 225 && angle < 315) {
-          await this.sendCommand('backward 10');
-        }
+    clearInterval(this.movementInterval);
+
+    this.movementInterval = setInterval(() => {
+      if (angle >= 315 || angle < 45) {
+        this.sendCommand(`rc ${this.speed} 0 0 0`); // Kanan
+      } else if (angle >= 45 && angle < 135) {
+        this.sendCommand(`rc 0 ${this.speed} 0 0`); // Maju
+      } else if (angle >= 135 && angle < 225) {
+        this.sendCommand(`rc -${this.speed} 0 0 0`); // Kiri
+      } else if (angle >= 225 && angle < 315) {
+        this.sendCommand(`rc 0 -${this.speed} 0 0`); // Mundur
       }
-    }
+    }, 100);
   }
 
-  async handleDirectionalJoystick(data: any) {
-    if (this.canSendCommand) {
-      const angle = data.angle.degree;
-      const distance = data.distance;
+  handleDirectionalJoystick(data: any) {
+    const angle = data.angle.degree;
 
-      if (distance > 20) {
-        if (angle >= 315 || angle < 45) {
-          await this.sendCommand('moveRight');
-        } else if (angle >= 45 && angle < 135) {
-          await this.sendCommand('moveUp');
-        } else if (angle >= 135 && angle < 225) {
-          await this.sendCommand('moveLeft');
-        } else if (angle >= 225 && angle < 315) {
-          await this.sendCommand('moveDown');
-        }
+    clearInterval(this.directionalInterval);
+
+    this.directionalInterval = setInterval(() => {
+      if (angle >= 315 || angle < 45) {
+        this.sendCommand(`rc 0 0 0 ${this.speed}`); // Putar Kanan
+      } else if (angle >= 45 && angle < 135) {
+        this.sendCommand(`rc 0 0 ${this.speed} 0`); // Naik
+      } else if (angle >= 135 && angle < 225) {
+        this.sendCommand(`rc 0 0 0 -${this.speed}`); // Putar Kiri
+      } else if (angle >= 225 && angle < 315) {
+        this.sendCommand(`rc 0 0 -${this.speed} 0`); // Turun
       }
-    }
+    }, 100);
   }
 
-  async sendCommand(command: string) {
-    if (this.canSendCommand) {
-      console.log(`Sending command: ${command}`);
-      await this.telloService.sendCommand('command'); // Memastikan drone masuk ke mode perintah
-      this.telloService.sendCommand(command);
-      this.canSendCommand = false;
-      await new Promise(resolve => setTimeout(resolve, this.commandDelay));
-      this.canSendCommand = true;
-    }
+  stopMovement() {
+    clearInterval(this.movementInterval);
+    this.sendCommand('rc 0 0 0 0');
   }
 
-  async takeOff() {
+  stopDirectional() {
+    clearInterval(this.directionalInterval);
+    this.sendCommand('rc 0 0 0 0');
+  }
+
+  sendCommand(command: string) {
+    console.log(`Sending command: ${command}`);
+    this.telloService.sendCommand(command);
+  }
+
+  takeOff() {
     console.log('Take Off command sent');
-    await this.sendCommand('takeoff');
+    this.sendCommand('takeoff');
   }
 
-  async land() {
+  land() {
     console.log('Land command sent');
-    await this.sendCommand('land');
-}
+    this.sendCommand('land');
+  }
 }
