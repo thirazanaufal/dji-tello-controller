@@ -1,5 +1,5 @@
 import { Component, AfterViewInit } from '@angular/core';
-import { TelloService } from '../services/tello.service';
+import { TelloService } from '../services/udp.service';
 import * as nipplejs from 'nipplejs';
 
 @Component({
@@ -12,6 +12,7 @@ export class HomePage implements AfterViewInit {
   directionalJoystick: any;
   private speed = 50; // Kecepatan gerakan drone
   private canSendCommand = true;
+  private RC: number[] = [0, 0, 0, 0]; // RC[0] = Roll, RC[1] = Pitch, RC[2] = Throttle, RC[3] = Yaw
 
   constructor(private telloService: TelloService) {}
 
@@ -48,52 +49,48 @@ export class HomePage implements AfterViewInit {
         this.handleDirectionalJoystick(data);
       });
 
-      this.movementJoystick.on('end', () => this.sendCommand('rc 0 0 0 0'));
-      this.directionalJoystick.on('end', () => this.sendCommand('rc 0 0 0 0'));
+      this.movementJoystick.on('end', () => this.resetRC());
+      this.directionalJoystick.on('end', () => this.resetRC());
     } else {
       console.error('Joystick elements not found');
     }
   }
 
-  async handleMovementJoystick(data: any) {
+  handleMovementJoystick(data: any) {
     if (this.canSendCommand) {
       const angle = data.angle.degree;
-      const distance = data.distance;
+      const strength = data.distance;
 
-      if (distance > 20) {
-        if (angle >= 315 || angle < 45) {
-          await this.sendCommand(`rc ${this.speed} 0 0 0`); // Maju
-        } else if (angle >= 45 && angle < 135) {
-          await this.sendCommand(`rc 0 ${this.speed} 0 0`); // Kiri
-        } else if (angle >= 135 && angle < 225) {
-          await this.sendCommand(`rc ${-this.speed} 0 0 0`); // Mundur
-        } else if (angle >= 225 && angle < 315) {
-          await this.sendCommand(`rc 0 ${-this.speed} 0 0`); // Kanan
-        }
+      if (angle > 45 && angle <= 135) {
+        this.RC[2] = strength; // Naik
+      } else if (angle > 226 && angle <= 315) {
+        this.RC[2] = -strength; // Turun
+      } else if (angle > 135 && angle <= 225) {
+        this.RC[3] = -strength; // Putar Kiri
       } else {
-        await this.sendCommand('rc 0 0 0 0'); // Hentikan gerakan
+        this.RC[3] = strength; // Putar Kanan
       }
+
+      this.sendCommand(`rc ${this.RC[0]} ${this.RC[1]} ${this.RC[2]} ${this.RC[3]}`);
     }
   }
 
-  async handleDirectionalJoystick(data: any) {
+  handleDirectionalJoystick(data: any) {
     if (this.canSendCommand) {
       const angle = data.angle.degree;
-      const distance = data.distance;
+      const strength = data.distance;
 
-      if (distance > 20) {
-        if (angle >= 315 || angle < 45) {
-          await this.sendCommand(`rc 0 0 ${this.speed} 0`); // Naik
-        } else if (angle >= 45 && angle < 135) {
-          await this.sendCommand(`rc 0 0 ${-this.speed} 0`); // Turun
-        } else if (angle >= 135 && angle < 225) {
-          await this.sendCommand(`rc 0 0 0 ${this.speed}`); // Putar Kiri
-        } else if (angle >= 225 && angle < 315) {
-          await this.sendCommand(`rc 0 0 0 ${-this.speed}`); // Putar Kanan
-        }
+      if (angle > 45 && angle <= 135) {
+        this.RC[1] = strength; // Kiri
+      } else if (angle > 226 && angle <= 315) {
+        this.RC[1] = -strength; // Kanan
+      } else if (angle > 135 && angle <= 225) {
+        this.RC[0] = -strength; // Mundur
       } else {
-        await this.sendCommand('rc 0 0 0 0'); // Hentikan gerakan
+        this.RC[0] = strength; // Maju
       }
+
+      this.sendCommand(`rc ${this.RC[0]} ${this.RC[1]} ${this.RC[2]} ${this.RC[3]}`);
     }
   }
 
@@ -105,6 +102,11 @@ export class HomePage implements AfterViewInit {
     }
   }
 
+  resetRC() {
+    this.RC = [0, 0, 0, 0];
+    this.sendCommand('rc 0 0 0 0'); // Hentikan gerakan
+  }
+
   async takeOff() {
     console.log('Take Off command sent');
     await this.sendCommand('takeoff');
@@ -114,4 +116,3 @@ export class HomePage implements AfterViewInit {
     console.log('Land command sent');
     await this.sendCommand('land');
   }
-}
