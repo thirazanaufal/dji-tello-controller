@@ -97,8 +97,16 @@ export class HomePage implements AfterViewInit {
   async sendCommand(command: string) {
     if (this.canSendCommand) {
       console.log(`Sending command: ${command}`);
-      await this.telloService.sendCommand('command'); // Memastikan drone masuk ke mode perintah
-      this.telloService.sendCommand(command);
+      try {
+        await this.telloService.sendCommand('command');
+        this.telloService.sendCommand(command);
+        this.canSendCommand = false;
+        setTimeout(() => {
+          this.canSendCommand = true;
+        }, 30);
+      } catch (error) {
+        console.error('Failed to send command:', error);
+      }
     }
   }
 
