@@ -10,7 +10,6 @@ import * as nipplejs from 'nipplejs';
 export class HomePage implements AfterViewInit {
   movementJoystick: any;
   directionalJoystick: any;
-  private speed = 50; // Kecepatan gerakan drone
   private canSendCommand = true;
   private RC: number[] = [0, 0, 0, 0]; // RC[0] = Roll, RC[1] = Pitch, RC[2] = Throttle, RC[3] = Yaw
 
@@ -56,10 +55,10 @@ export class HomePage implements AfterViewInit {
     }
   }
 
-  handleMovementJoystick(data: any) {
+  handleDirectionalJoystick(data: any) {
     if (this.canSendCommand) {
       const angle = data.angle.degree;
-      const strength = data.distance;
+      const strength =  Math.round(data.distance); // Gunakan strength apa adanya
 
       if (angle > 45 && angle <= 135) {
         this.RC[2] = strength; // Naik
@@ -75,10 +74,10 @@ export class HomePage implements AfterViewInit {
     }
   }
 
-  handleDirectionalJoystick(data: any) {
+  handleMovementJoystick(data: any) {
     if (this.canSendCommand) {
       const angle = data.angle.degree;
-      const strength = data.distance;
+      const strength =  Math.round(data.distance); // Gunakan strength apa adanya
 
       if (angle > 45 && angle <= 135) {
         this.RC[1] = strength; // Kiri
@@ -95,20 +94,13 @@ export class HomePage implements AfterViewInit {
   }
 
   async sendCommand(command: string) {
-    if (this.canSendCommand) {
-      console.log(`Sending command: ${command}`);
-      try {
-        await this.telloService.sendCommand('command');
-        this.telloService.sendCommand(command);
-        this.canSendCommand = false;
-        setTimeout(() => {
-          this.canSendCommand = true;
-        }, 30);
-      } catch (error) {
-        console.error('Failed to send command:', error);
-      }
-    }
+  if (this.canSendCommand) {
+    console.log(`Sending command: ${command}`);
+    await this.telloService.sendCommand('command'); // Memastikan drone masuk ke mode perintah
+    await this.telloService.sendCommand(command);
   }
+}
+
 
   resetRC() {
     this.RC = [0, 0, 0, 0];
@@ -124,3 +116,4 @@ export class HomePage implements AfterViewInit {
     console.log('Land command sent');
     await this.sendCommand('land');
   }
+}
