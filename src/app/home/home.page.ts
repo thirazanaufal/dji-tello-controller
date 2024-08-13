@@ -30,7 +30,7 @@ export class HomePage implements AfterViewInit, OnInit {
     setInterval(() => {
       this.updateBatteryStatus();
       this.connection = this.telloService.checkConnectionStatus() ? 'Terhubung' : 'Tidak Terhubung';
-    }, 5000);
+    }, 3000);
   }
 
   updateBatteryStatus() {
@@ -40,6 +40,15 @@ export class HomePage implements AfterViewInit, OnInit {
         this.battery = status;
       });
     });
+  }
+
+  updateConnectionStatus() {
+    const isConnected = this.telloService.checkConnectionStatus();
+    console.log('Connection Status:', isConnected ? 'Connected' : 'Disconnected');
+    this.connection = isConnected ? 'Connected' : 'Disconnected';
+    if (!isConnected) {
+      this.battery = null;
+    }
   }
 
   initJoysticks() {
