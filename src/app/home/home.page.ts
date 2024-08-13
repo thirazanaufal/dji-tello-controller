@@ -1,22 +1,45 @@
-import { Component, AfterViewInit } from '@angular/core';
+import { Component, AfterViewInit, OnInit, NgZone } from '@angular/core';
 import { TelloService } from '../services/udp.service';
 import * as nipplejs from 'nipplejs';
+import { Subscription, interval } from 'rxjs';
 
 @Component({
   selector: 'app-home',
   templateUrl: 'home.page.html',
   styleUrls: ['home.page.scss'],
 })
-export class HomePage implements AfterViewInit {
+export class HomePage implements AfterViewInit, OnInit {
   movementJoystick: any;
   directionalJoystick: any;
   private canSendCommand = true;
   private RC: number[] = [0, 0, 0, 0]; // RC[0] = Roll, RC[1] = Pitch, RC[2] = Throttle, RC[3] = Yaw
 
-  constructor(private telloService: TelloService) {}
+  battery: number | null = null;
+  connection: string = 'Disconnected';
+  batterySubscription: Subscription | null = null;
+  connectionSubscription: Subscription | null = null;
+
+  constructor(private telloService: TelloService, private zone: NgZone) {}
 
   ngAfterViewInit() {
     this.initJoysticks();
+  }
+
+  ngOnInit() {
+    this.updateBatteryStatus();
+    setInterval(() => {
+      this.updateBatteryStatus();
+      this.connection = this.telloService.checkConnectionStatus() ? 'Terhubung' : 'Tidak Terhubung';
+    }, 5000);
+  }
+
+  updateBatteryStatus() {
+    this.telloService.getBatteryStatus((status: number) => {
+      console.log('Battery Status:', status); // Log untuk memastikan nilai
+      this.zone.run(() => {
+        this.battery = status;
+      });
+    });
   }
 
   initJoysticks() {
@@ -58,7 +81,7 @@ export class HomePage implements AfterViewInit {
   handleDirectionalJoystick(data: any) {
     if (this.canSendCommand) {
       const angle = data.angle.degree;
-      const strength =  Math.round(data.distance); // Gunakan strength apa adanya
+      const strength = Math.round(data.distance);
 
       if (angle > 45 && angle <= 135) {
         this.RC[2] = strength; // Naik
@@ -77,7 +100,7 @@ export class HomePage implements AfterViewInit {
   handleMovementJoystick(data: any) {
     if (this.canSendCommand) {
       const angle = data.angle.degree;
-      const strength =  Math.round(data.distance); // Gunakan strength apa adanya
+      const strength = Math.round(data.distance);
 
       if (angle > 45 && angle <= 135) {
         this.RC[1] = strength; // Kiri
@@ -94,13 +117,12 @@ export class HomePage implements AfterViewInit {
   }
 
   async sendCommand(command: string) {
-  if (this.canSendCommand) {
-    console.log(`Sending command: ${command}`);
-    await this.telloService.sendCommand('command'); // Memastikan drone masuk ke mode perintah
-    await this.telloService.sendCommand(command);
+    if (this.canSendCommand) {
+      console.log(`Mengirim perintah: ${command}`);
+      await this.telloService.sendCommand('command'); // Memastikan drone masuk ke mode perintah
+      await this.telloService.sendCommand(command);
+    }
   }
-}
-
 
   resetRC() {
     this.RC = [0, 0, 0, 0];
@@ -108,12 +130,12 @@ export class HomePage implements AfterViewInit {
   }
 
   async takeOff() {
-    console.log('Take Off command sent');
+    console.log('Perintah Take Off dikirim');
     await this.sendCommand('takeoff');
   }
 
   async land() {
-    console.log('Land command sent');
+    console.log('Perintah Landing dikirim');
     await this.sendCommand('land');
   }
 }
