@@ -34,6 +34,15 @@
       </ion-button>
     </div>
 
+    <div class="top-info">
+      <div class="battery-status">
+        <ion-label>Status Baterai: {{ battery !== null ? battery + '%' : 'Memuat...' }}</ion-label>
+      </div>
+      <div class="connection-status" [ngClass]="{'connected': connection === 'Connected', 'disconnected': connection === 'Disconnected'}">
+        <ion-label>Status Koneksi: {{ connection }}</ion-label>
+      </div>
+    </div>
+
     <div class="joystick-group">
       <div class="joystick-container">
         <div class="joystick-label top-label">Maju</div>
