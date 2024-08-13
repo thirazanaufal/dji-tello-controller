@@ -61,6 +61,7 @@ export class TelloService {
             if (this.batteryStatusCallback) {
               this.batteryStatusCallback(this.battery);
             }
+            this.lastResponseTime = Date.now();
           }
         }
       });
@@ -86,8 +87,8 @@ export class TelloService {
   }
 
   checkConnectionStatus(): boolean {
+    // Jika lastResponseTime lebih dari 5 detik yang lalu, dianggap disconnected
     const currentTime = Date.now();
-    const timeSinceLastResponse = currentTime - this.lastResponseTime;
-    return timeSinceLastResponse < 5000;
+    return (currentTime - this.lastResponseTime) < 2000;
   }
 }
