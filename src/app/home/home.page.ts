@@ -1,7 +1,6 @@
 import { Component, AfterViewInit, OnInit, NgZone } from '@angular/core';
 import { TelloService } from '../services/udp.service';
 import * as nipplejs from 'nipplejs';
-import { Subscription, interval } from 'rxjs';
 
 @Component({
   selector: 'app-home',
@@ -16,8 +15,8 @@ export class HomePage implements AfterViewInit, OnInit {
 
   battery: number | null = null;
   connection: string = 'Disconnected';
-  batterySubscription: Subscription | null = null;
-  connectionSubscription: Subscription | null = null;
+
+  cameraOn = true;
 
   constructor(private telloService: TelloService, private zone: NgZone) {}
 
@@ -27,10 +26,11 @@ export class HomePage implements AfterViewInit, OnInit {
 
   ngOnInit() {
     this.updateBatteryStatus();
+    this.updateConnectionStatus();
     setInterval(() => {
       this.updateBatteryStatus();
-      this.connection = this.telloService.checkConnectionStatus() ? 'Terhubung' : 'Tidak Terhubung';
-    }, 3000);
+      this.updateConnectionStatus();
+    }, 3000);//harus sama durasinya
   }
 
   updateBatteryStatus() {
@@ -128,7 +128,6 @@ export class HomePage implements AfterViewInit, OnInit {
   async sendCommand(command: string) {
     if (this.canSendCommand) {
       console.log(`Mengirim perintah: ${command}`);
-      await this.telloService.sendCommand('command'); // Memastikan drone masuk ke mode perintah
       await this.telloService.sendCommand(command);
     }
   }
@@ -147,4 +146,9 @@ export class HomePage implements AfterViewInit, OnInit {
     console.log('Perintah Landing dikirim');
     await this.sendCommand('land');
   }
+
+  toggleCamera() {
+    this.cameraOn = !this.cameraOn;
+  }
+
 }
