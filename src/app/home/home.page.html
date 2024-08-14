@@ -1,22 +1,3 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-title>
-      DJI Tello Controller
-    </ion-title>
-  </ion-toolbar>
-</ion-header>
-
-<ion-content class="ion-padding">
-  <ion-button expand="full" color="primary" (click)="takeOff()">
-    Take Off
-  </ion-button>
-  <ion-button expand="full" color="danger" (click)="land()">
-    Land
-  </ion-button>
-  <ion-button expand="full" color="secondary" (click)="sendCommand('command')">
-    Send Command Mode
-  </ion-button>
-
 <ion-content class="ion-padding">
   <div class="controller-container">
     <div class="top-right">
@@ -58,6 +39,16 @@
         <div class="joystick-label bottom-label">Turun</div>
       </div>
     </div>
+    
+    <!-- Tombol Kamera -->
+    <div class="camera-toggle">
+      <ion-button fill="clear" size="small" (click)="toggleCamera()">
+        <ion-icon [name]="cameraOn ? 'eye-off' : 'eye'" slot="icon-only"></ion-icon>
+      </ion-button>
+    </div>
+
+    <div class="video-container" [class.video-off]="!cameraOn">
+      <video id="drone-video" autoplay *ngIf="cameraOn"></video>
+    </div>
   </div>
-</ion-content> 
 </ion-content>
