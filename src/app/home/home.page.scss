@@ -83,7 +83,6 @@ ion-content {
   width: 125px;
   height: 125px;
   pointer-events: auto; /* Aktifkan pointer untuk joystick */
-
 }
 
 /* Joystick Labels */
@@ -91,27 +90,26 @@ ion-content {
   position: absolute;
   font-size: 14px;
   color: #333;
-}
 
-/* Specific Label Positions */
-.top-label {
-  top: -30px;
-}
+  &.top-label {
+    top: -30px;
+  }
 
-.bottom-label {
-  bottom: -30px;
-}
+  &.bottom-label {
+    bottom: -30px;
+  }
 
-.left-label {
-  left: -40px;
-  top: 50%;
-  transform: translateY(-50%);
-}
+  &.left-label {
+    left: -40px;
+    top: 50%;
+    transform: translateY(-50%);
+  }
 
-.right-label {
-  right: -60px;
-  top: 50%;
-  transform: translateY(-50%);
+  &.right-label {
+    right: -60px;
+    top: 50%;
+    transform: translateY(-50%);
+  }
 }
 
 /* Joystick Styling */
@@ -140,34 +138,15 @@ ion-content {
   font-size: 10px;
   color: #333;
   margin-right: 10px; /* Jarak antara status baterai dan koneksi */
+
+  &.connected {
+    color: green; /* Warna untuk status connected */
+  }
+
+  &.disconnected {
+    color: red; /* Warna untuk status disconnected */
+  }
 }
-
-.connection-status {
-  font-size: 10px;
-  color: red; /* Warna default untuk status disconnected */
-}
-
-.connection-status.connected {
-  color: green; /* Warna untuk status connected */
-}
-
-.connection-status.disconnected {
-  color: red; /* Warna untuk status disconnected */
-}
-
-.battery-status {
-  font-size: 10px;
-  font-weight: bold;
-  color: #333;
-}
-
-// .battery-status.connected {
-//   color: #333; /* Warna untuk status connected */
-// }
-
-// .battery-status.disconnected {
-//   color: green; /* Warna untuk status disconnected */
-// }
 
 /* Background Video */
 .background-video {
@@ -204,9 +183,9 @@ ion-content {
   bottom: 16px;
   right: 16px;
   z-index: 2;
-}
 
-.camera-toggle ion-button {
-  --background: rgba(255, 255, 255, 0.7); /* Latar belakang semi-transparan */
-  --color: #333; /* Warna ikon */
+  ion-button {
+    --background: rgba(255, 255, 255, 0.7); /* Latar belakang semi-transparan */
+    --color: #333; /* Warna ikon */
+  }
 }
