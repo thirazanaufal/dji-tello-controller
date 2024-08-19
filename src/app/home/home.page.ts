@@ -27,6 +27,7 @@ export class HomePage implements AfterViewInit, OnInit {
   ngOnInit() {
     this.updateBatteryStatus();
     this.updateConnectionStatus();
+    
     setInterval(() => {
       this.updateBatteryStatus();
       this.updateConnectionStatus();
@@ -62,6 +63,7 @@ export class HomePage implements AfterViewInit, OnInit {
         position: { left: '50%', bottom: '62px' },
         color: 'red',
         size: 125,
+        dynamicPage: true, // needed because of vue
       });
 
       this.directionalJoystick = nipplejs.create({
@@ -70,6 +72,8 @@ export class HomePage implements AfterViewInit, OnInit {
         position: { left: '50%', bottom: '62px' },
         color: 'blue',
         size: 125,
+        dynamicPage: true, // needed because of vue
+
       });
 
       this.movementJoystick.on('move', (_evt: any, data: any) => {
