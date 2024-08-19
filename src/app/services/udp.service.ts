@@ -8,7 +8,9 @@ declare var chrome: any;
 export class TelloService {
   private telloAddress = '192.168.10.1';
   private telloPort = 8889;
+  private videoPort = 11111;
   private socketId: number | null = null;
+  private videoSocketId: number | null = null;
 
   private batteryStatusCallback: (status: number) => void = () => {};
   private lastResponseTime: number = 0;
@@ -17,6 +19,7 @@ export class TelloService {
   constructor() {
     document.addEventListener('deviceready', () => {
       this.createSocket();
+      this.createVideoSocket();
     }, false);
   }
 
@@ -45,24 +48,49 @@ export class TelloService {
     }
   }
 
+  createVideoSocket() {
+    if (chrome && chrome.sockets && chrome.sockets.udp) {
+      chrome.sockets.udp.create({}, (socketInfo: any) => {
+        this.videoSocketId = socketInfo.socketId;
+        chrome.sockets.udp.bind(this.videoSocketId, '0.0.0.0', this.videoPort, (result: any) => {
+          if (result < 0) {
+            console.error('Gagal bind video socket:', chrome.runtime.lastError);
+          } else {
+            this.startVideoReceiving();
+          }
+        });
+      });
+    }
+  }
+
   startReceiving() {
     if (this.socketId !== null) {
       chrome.sockets.udp.onReceive.addListener((info: any) => {
         if (info.socketId === this.socketId) {
           const message = new TextDecoder().decode(new Uint8Array(info.data));
           console.log('Pesan diterima:', message);
-          // Asumsi pesan hanya berupa angka yang merepresentasikan tingkat baterai
           const batteryLevel = parseInt(message.trim(), 10);
           if (!isNaN(batteryLevel)) {
             this.battery = batteryLevel;
             console.log('Tingkat baterai:', this.battery);
-
-            // Panggil callback dengan tingkat baterai terbaru
             if (this.batteryStatusCallback) {
               this.batteryStatusCallback(this.battery);
             }
             this.lastResponseTime = Date.now();
           }
+        }
+      });
+    }
+  }
+
+  startVideoReceiving() {
+    if (this.videoSocketId !== null) {
+      chrome.sockets.udp.onReceive.addListener((info: any) => {
+        if (info.socketId === this.videoSocketId) {
+          const videoData = new Uint8Array(info.data);
+          console.log('Video data diterima:', videoData);
+          // Implementasi library untuk menampilkan video data
+          // Anda bisa menggunakan library seperti jsmpeg untuk memproses videoData
         }
       });
     }
@@ -87,8 +115,15 @@ export class TelloService {
   }
 
   checkConnectionStatus(): boolean {
-    // Jika lastResponseTime lebih dari 5 detik yang lalu, dianggap disconnected
     const currentTime = Date.now();
     return (currentTime - this.lastResponseTime) < 3000;
+  }
+
+  startVideoStream() {
+    this.sendCommand('streamon');
+  }
+
+  stopVideoStream() {
+    this.sendCommand('streamoff');
   }
 }
