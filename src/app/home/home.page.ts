@@ -31,12 +31,12 @@ export class HomePage implements AfterViewInit, OnInit {
     setInterval(() => {
       this.updateBatteryStatus();
       this.updateConnectionStatus();
-    }, 3000);//harus sama durasinya
+    }, 3000);
   }
 
   updateBatteryStatus() {
     this.telloService.getBatteryStatus((status: number) => {
-      console.log('Battery Status:', status); // Log untuk memastikan nilai
+      console.log('Battery Status:', status);
       this.zone.run(() => {
         this.battery = status;
       });
@@ -73,7 +73,6 @@ export class HomePage implements AfterViewInit, OnInit {
         color: 'blue',
         size: 125,
         dynamicPage: true, // needed because of vue
-
       });
 
       this.movementJoystick.on('move', (_evt: any, data: any) => {
@@ -153,6 +152,11 @@ export class HomePage implements AfterViewInit, OnInit {
 
   toggleCamera() {
     this.cameraOn = !this.cameraOn;
+    if (this.cameraOn) {
+      this.telloService.startVideoStream();
+    } else {
+      this.telloService.stopVideoStream();
+    }
   }
 
 }
