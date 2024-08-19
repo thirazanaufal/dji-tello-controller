@@ -33,18 +33,6 @@ ion-content {
   }
 }
 
-/* Background Video */
-.background-video {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: none;
-
-  &.camera-on {
-    display: block;
-  }
-}
-
 /* Foreground Content */
 .foreground-content {
   position: relative;
@@ -92,6 +80,10 @@ ion-content {
   display: flex;
   flex-direction: column;
   align-items: center;
+  width: 125px;
+  height: 125px;
+  pointer-events: auto; /* Aktifkan pointer untuk joystick */
+
 }
 
 /* Joystick Labels */
@@ -103,11 +95,11 @@ ion-content {
 
 /* Specific Label Positions */
 .top-label {
-  top: -20px;
+  top: -30px;
 }
 
 .bottom-label {
-  bottom: -20px;
+  bottom: -30px;
 }
 
 .left-label {
@@ -117,7 +109,7 @@ ion-content {
 }
 
 .right-label {
-  right: -40px;
+  right: -60px;
   top: 50%;
   transform: translateY(-50%);
 }
@@ -128,21 +120,6 @@ ion-content {
   height: 125px;
   background-color: #eee;
   border-radius: 50%;
-}
-
-.video-container {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: -1; /* Pastikan video berada di latar belakang */
-}
-
-#drone-video {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
 }
 
 /* Info Status (Battery and Connection) */
@@ -160,13 +137,13 @@ ion-content {
 
 /* Status Baterai dan Koneksi */
 .battery-status, .connection-status {
-  font-size: 14px;
+  font-size: 10px;
   color: #333;
-  margin-right: 20px; /* Jarak antara status baterai dan koneksi */
+  margin-right: 10px; /* Jarak antara status baterai dan koneksi */
 }
 
 .connection-status {
-  font-size: 14px;
+  font-size: 10px;
   color: red; /* Warna default untuk status disconnected */
 }
 
@@ -179,9 +156,47 @@ ion-content {
 }
 
 .battery-status {
-  font-size: 14px;
+  font-size: 10px;
   font-weight: bold;
   color: #333;
+}
+
+// .battery-status.connected {
+//   color: #333; /* Warna untuk status connected */
+// }
+
+// .battery-status.disconnected {
+//   color: green; /* Warna untuk status disconnected */
+// }
+
+/* Background Video */
+.background-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: none;
+
+  &.camera-on {
+    display: block;
+  }
+}
+
+/* Video Container */
+.video-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1; /* Pastikan video berada di latar belakang */
+  overflow: hidden; /* Hindari overflow jika diperlukan */
+}
+
+/* Video Element */
+#drone-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Pastikan video memenuhi area tanpa mengubah rasio aspek */
 }
 
 .camera-toggle {
